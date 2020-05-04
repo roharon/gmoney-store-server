@@ -1,0 +1,19 @@
+spring:
+  profiles: default
+  datasource:
+    username: roharon
+    password: password
+    url: jdbc:postgresql://localhost:5432/gmoney
+server:
+  port: 6000
+---
+spring:
+  profiles: develop
+  datasource:
+    username: roharon
+    password: password
+    url: jdbc:postgresql://localhost:5432/gmoney-test
+logging:
+  level: info
+server:
+  port: 7000
