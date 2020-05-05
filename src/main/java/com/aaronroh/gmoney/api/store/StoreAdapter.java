@@ -12,4 +12,11 @@ public class StoreAdapter {
                 .errors(errors)
                 .build();
     }
+
+    public static StoreListResponse storeListResponse(final List<Store> storeList, final List<String> errors){
+        return StoreListResponse.builder()
+                .storeList(storeList)
+                .errors(errors)
+                .build();
+    }
 }

@@ -2,6 +2,7 @@ package com.aaronroh.gmoney.api.store;
 
 import com.aaronroh.gmoney.domain.store.Store;
 import com.aaronroh.gmoney.domain.store.StoreRepository;
+import com.sun.media.jfxmedia.logging.Logger;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -49,6 +50,24 @@ public class StoreController {
         }
 
         return StoreAdapter.storeResponse(store, errors);
+    }
+
+    @ApiOperation(value="근처 가맹점 조회", notes ="사용자 기준 근처 가맹점 조회")
+    @GetMapping("/near")
+    public @ResponseBody StoreListResponse getNearStore(
+            @ApiParam(value="위도", required = true) @RequestParam float lat,
+            @ApiParam(value="경도", required = true) @RequestParam float lon) {
+        final int RADIUS = 10000; //TODO: move to config
+        List<String> errors = new ArrayList<>();
+        List<Store> storeList = null;
+
+        try{
+            storeList = storeRepository.findByEarthDistance(lat, lon, RADIUS);
+        } catch(Exception e){
+            errors.add(e.getMessage());
+        }
+
+        return StoreAdapter.storeListResponse(storeList, errors);
     }
 
 }
