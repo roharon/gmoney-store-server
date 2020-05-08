@@ -60,8 +60,7 @@ public class StoreController {
             @ApiParam(value="페이지", defaultValue = "0") @RequestParam Integer page,
             @ApiParam(value="시군", required = true) @RequestParam String sigoon,
             @ApiParam(value="위도", required = true) @RequestParam float lat,
-            @ApiParam(value="경도", required = true) @RequestParam float lon,
-            final Pageable pageable) {
+            @ApiParam(value="경도", required = true) @RequestParam float lon) {
         List<String> errors = new ArrayList<>();
         Page<Store> storeList = null;
 
@@ -76,7 +75,7 @@ public class StoreController {
     }
 
     @ApiOperation(value="근처 BigCategory별 가맹점 수 조회", notes="사용자 기준 근처 카테고리별 가맹점 수 조회")
-    @GetMapping("/near/category")
+    @GetMapping("/near/category/count")
     public @ResponseBody StoreCategoryCountResponse getStoreCategoryCount(
             @ApiParam(value="카테고리", required = true) @RequestParam Store.BigCategory category,
             @ApiParam(value="시군", required = true) @RequestParam String sigoon,
@@ -94,5 +93,26 @@ public class StoreController {
         }
 
         return StoreAdapter.storeCategoryCountResponse(countDict, errors);
+    }
+
+    @ApiOperation(value="근처 BigCategory별 가맹점 조회", notes ="사용자 기준 근처 카테고리별 가맹점 조회")
+    @GetMapping("/near/category")
+    public @ResponseBody StoreListResponse getNearStoreByCategory(
+            @ApiParam(value="페이지", defaultValue = "0") @RequestParam Integer page,
+            @ApiParam(value="카테고리", required = true) @RequestParam Store.BigCategory category,
+            @ApiParam(value="시군", required = true) @RequestParam String sigoon,
+            @ApiParam(value="위도", required = true) @RequestParam float lat,
+            @ApiParam(value="경도", required = true) @RequestParam float lon) {
+        List<String> errors = new ArrayList<>();
+        Page<Store> storeList = null;
+
+        try{
+            PageRequest pageRequest = PageRequest.of(page, 30);
+            storeList = storeRepository.findByCategoryAndSigoonAndEarthDistance(pageRequest, category.toString(), sigoon, lat, lon, RADIUS);
+        } catch(Exception e){
+            errors.add(e.getMessage());
+        }
+
+        return StoreAdapter.storeListResponse(storeList, errors);
     }
 }

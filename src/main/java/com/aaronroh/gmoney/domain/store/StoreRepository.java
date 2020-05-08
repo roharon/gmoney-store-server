@@ -18,11 +18,22 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
                                              @Param("longitude") Float longitude, @Param("radius") Integer radius);
 
     @Query(
+            value = "SELECT * FROM store s WHERE s.big_category = :bigCategory and s.sigoon = :sigoon and earth_distance(" +
+                    "ll_to_earth(CAST(s.latitude as float), CAST(s.longitude as float))," +
+                    "ll_to_earth(:latitude, :longitude)) < :radius",
+            countQuery = "SELECT COUNT(*) FROM store",
+            nativeQuery = true)
+    Page<Store> findByCategoryAndSigoonAndEarthDistance(Pageable pageable,
+                                                    @Param("bigCategory") String bigCategory,
+                                                    @Param("sigoon") String sigoon, @Param("latitude") Float latitude,
+                                                    @Param("longitude") Float longitude, @Param("radius") Integer radius);
+
+    @Query(
             value = "SELECT count(*) FROM store s WHERE s.big_category = :bigCategory and s.sigoon = :sigoon and earth_distance(" +
                     "ll_to_earth(CAST(s.latitude as float), CAST(s.longitude as float))," +
                     "ll_to_earth(:latitude, :longitude)) < :radius",
             nativeQuery = true)
     Integer countByCategoryAndSigoonAndEarthDistance(@Param("bigCategory") String bigCategory,
-                                            @Param("sigoon") String sigoon, @Param("latitude") Float latitude,
-                                             @Param("longitude") Float longitude, @Param("radius") Integer radius);
+                                                     @Param("sigoon") String sigoon, @Param("latitude") Float latitude,
+                                                     @Param("longitude") Float longitude, @Param("radius") Integer radius);
 }
