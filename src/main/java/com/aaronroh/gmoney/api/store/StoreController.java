@@ -2,16 +2,17 @@ package com.aaronroh.gmoney.api.store;
 
 import com.aaronroh.gmoney.domain.store.Store;
 import com.aaronroh.gmoney.domain.store.StoreRepository;
-import com.sun.media.jfxmedia.logging.Logger;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Api(tags = {"1. Store"})
 @RestController
@@ -20,6 +21,7 @@ import java.util.List;
 public class StoreController {
 
     private StoreRepository storeRepository;
+    final int RADIUS = 3000; //TODO: move to config
 
     @ApiOperation(value="가맹점 정보", notes = "해당 가맹점의 정보 조회")
     @GetMapping("/{id}")
@@ -55,14 +57,17 @@ public class StoreController {
     @ApiOperation(value="근처 가맹점 조회", notes ="사용자 기준 근처 가맹점 조회")
     @GetMapping("/near")
     public @ResponseBody StoreListResponse getNearStore(
+            @ApiParam(value="페이지", defaultValue = "0") @RequestParam Integer page,
+            @ApiParam(value="시군", required = true) @RequestParam String sigoon,
             @ApiParam(value="위도", required = true) @RequestParam float lat,
-            @ApiParam(value="경도", required = true) @RequestParam float lon) {
-        final int RADIUS = 10000; //TODO: move to config
+            @ApiParam(value="경도", required = true) @RequestParam float lon,
+            final Pageable pageable) {
         List<String> errors = new ArrayList<>();
-        List<Store> storeList = null;
+        Page<Store> storeList = null;
 
         try{
-            storeList = storeRepository.findByEarthDistance(lat, lon, RADIUS);
+            PageRequest pageRequest = PageRequest.of(page, 30);
+            storeList = storeRepository.findBySigoonAndEarthDistance(pageRequest, sigoon, lat, lon, RADIUS);
         } catch(Exception e){
             errors.add(e.getMessage());
         }
@@ -70,4 +75,24 @@ public class StoreController {
         return StoreAdapter.storeListResponse(storeList, errors);
     }
 
+    @ApiOperation(value="근처 BigCategory별 가맹점 수 조회", notes="사용자 기준 근처 카테고리별 가맹점 수 조회")
+    @GetMapping("/near/category")
+    public @ResponseBody StoreCategoryCountResponse getStoreCategoryCount(
+            @ApiParam(value="카테고리", required = true) @RequestParam Store.BigCategory category,
+            @ApiParam(value="시군", required = true) @RequestParam String sigoon,
+            @ApiParam(value="위도", required = true) @RequestParam float lat,
+            @ApiParam(value="경도", required = true) @RequestParam float lng) {
+        List<String> errors = new ArrayList<>();
+        Map<String, Integer> countDict = new HashMap<>();
+        int storeCount;
+
+        try{
+            storeCount = storeRepository.countByCategoryAndSigoonAndEarthDistance(category.toString(), sigoon, lat, lng, RADIUS);
+            countDict.put(category.toString(), storeCount);
+        } catch(Exception e){
+            errors.add(e.getMessage());
+        }
+
+        return StoreAdapter.storeCategoryCountResponse(countDict, errors);
+    }
 }
