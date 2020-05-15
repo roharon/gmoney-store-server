@@ -9,14 +9,17 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityNotFoundException;
-import javax.validation.constraints.Min;
+import javax.validation.ConstraintViolationException;
+import javax.validation.constraints.Size;
 import java.util.*;
 
 @Api(tags = {"1. Store"})
+@Validated
 @RestController
 @AllArgsConstructor
 @RequestMapping(value = "/store")
@@ -47,7 +50,7 @@ public class StoreController {
     @GetMapping("/search")
     public @ResponseBody StoreListResponse searchStore(
             @ApiParam(value="페이지", defaultValue = "0") @RequestParam Integer page,
-            @ApiParam(value="이름", required=true) @RequestParam @Min(3) String title,
+            @ApiParam(value="이름", required=true) @RequestParam @Size(min=3, message="minimum 3") String title,
             @ApiParam(value="시군") @RequestParam(required = false) String sigoon) {
         List<String> errors = new ArrayList<>();
         Page<Store> storeList = null;
@@ -161,5 +164,14 @@ public class StoreController {
         }
 
         return StoreAdapter.storeListResponse(storeList, errors);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody Map handleConstraintViolationException(ConstraintViolationException e) {
+        Map<String, String> errorResult = new HashMap<>();
+        errorResult.put("errors", e.getMessage());
+
+        return errorResult;
     }
 }

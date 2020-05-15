@@ -48,7 +48,7 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
     Page<Store> findByTitleLike(Pageable pageable, @Param("title") String title);
 
     @Query(
-            value = "SELECT * FROM store s WHERE s.sigoon = CAST(:sigoon as varchar) and s.big_category = CAST(:bigCategory as varchar)",
+            value = "SELECT * FROM store s WHERE s.sigoon = :sigoon and s.big_category = :bigCategory",
             nativeQuery = true)
     Page<Store> findBySigoonAndBigCategory(Pageable pageable, @Param("sigoon") String sigoon, @Param("bigCategory") String bigCategory);
 
