@@ -5,16 +5,16 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Getter
 @Entity
 @NoArgsConstructor
 @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 public class Store {
+
+    public enum BigCategory {animal_hospital, beauty, car_service, cvs, education, fashion,
+                                    hospital, lodge, market, personal, pharmacy, restaurant, sports}
     @Id
     @GeneratedValue
     private Long id;
@@ -46,10 +46,14 @@ public class Store {
     @Column
     private String updateDate;
 
+    @Column
+    @Enumerated(EnumType.STRING)
+    private BigCategory bigCategory;
+
     @Builder
     public Store(String title, String category, String sigoon, String address,
                  String phoneNumber, String postCode,
-                 float latitude, float longitude) {
+                 float latitude, float longitude, BigCategory bigCategory) {
         this.title = title;
         this.category = category;
         this.sigoon = sigoon;
@@ -58,5 +62,6 @@ public class Store {
         this.postCode = postCode;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.bigCategory = bigCategory;
     }
 }
