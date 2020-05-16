@@ -2,10 +2,9 @@ spring:
   datasource:
     username: roharon
     password: password
-    url: jdbc:postgresql://localhost:5432/gmoney-test
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:25432/gmoney-test
   jpa:
     hibernate:
       ddl-auto: update
 server:
-  port: 8080
+  port: 8055

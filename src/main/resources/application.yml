@@ -1,11 +1,10 @@
 spring:
-  profiles: default
   datasource:
-    username: roharon
-    password: password
-    url: jdbc:postgresql://localhost:5432/gmoney
+    username: ${USER_NAME}
+    password: ${PASSWORD}
+    url: jdbc:postgresql://localhost:${POSTGRES_IN_PORT}/gmoney
   jpa:
     hibernate:
       ddl-auto: update
 server:
-  port: 8080
+  port: ${SERVER_PORT}
