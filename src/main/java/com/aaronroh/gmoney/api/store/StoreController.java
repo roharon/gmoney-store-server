@@ -89,21 +89,6 @@ public class StoreController {
         return StoreAdapter.storeListResponse(storeList, errors);
     }
 
-    @ApiOperation(value="가맹점 추가", notes = "가맹점 새로 추가")
-    @PostMapping("/")
-    public @ResponseBody StoreResponse editStore(
-            @ApiParam(value = "가맹점 정보", required = true) @RequestBody StoreSaveRequestDto dto){
-        List<String> errors = new ArrayList<>();
-        Store store = dto.toEntity();
-        try {
-            storeRepository.save(store);
-        } catch(Exception e){
-            errors.add(e.getMessage());
-        }
-
-        return StoreAdapter.storeResponse(store, errors);
-    }
-
     @ApiOperation(value="근처 가맹점 조회", notes ="사용자 기준 근처 가맹점 조회")
     @GetMapping("/near")
     public @ResponseBody StoreListResponse getNearStore(
