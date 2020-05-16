@@ -22,7 +22,7 @@ import java.util.*;
 @Validated
 @RestController
 @AllArgsConstructor
-@RequestMapping(value = "/store")
+@RequestMapping(value = "/api/v1/store")
 public class StoreController {
 
     private StoreRepository storeRepository;
