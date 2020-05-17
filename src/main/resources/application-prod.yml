@@ -2,5 +2,3 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-server:
-  port: ${SERVER_PORT}

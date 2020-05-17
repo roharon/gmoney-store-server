@@ -7,10 +7,6 @@ services:
       POSTGRES_USER: ${USER_NAME}
       POSTGRES_PASSWORD: ${PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-      - ${POSTGRES_IN_PORT}:${POSTGRES_OUT_PORT}
-    expose:
-      - ${POSTGRES_IN_PORT}
     volumes:
       - /var/lib/postgresql/docker/database:/var/lib/postgresql/database
   app:
@@ -22,6 +18,7 @@ services:
         SPRING_DATASOURCE_URL: jdbc:postgresql://postgres/${POSTGRES_DB}
         SPRING_DATASOURCE_USERNAME: ${USER_NAME}
         SPRING_DATASOURCE_PASSWORD: ${PASSWORD}
+        SERVER_PORT: ${SERVER_PORT}
     expose:
       - ${SERVER_PORT}
     depends_on:
