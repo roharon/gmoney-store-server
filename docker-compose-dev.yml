@@ -1,0 +1,37 @@
+version: '3.4'
+services:
+  postgres:
+    restart: always
+    image: 'postgres:12.2'
+    environment:
+      POSTGRES_USER: gmoney
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: gmoney-test
+    ports:
+      - 25432:5432
+    volumes:
+      - /var/lib/postgresql/docker/database:/var/lib/postgresql/database
+  app:
+    build: .
+    env_file:
+      - .env
+    environment:
+        SPRING_PROFILES_ACTIVE: develop
+        SPRING_DATASOURCE_URL: jdbc:postgresql://postgres/gmoney-test
+        SPRING_DATASOURCE_USERNAME: gmoney
+        SPRING_DATASOURCE_PASSWORD: password
+        SERVER_PORT: 8080
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
+  nginx_server:
+    image: nginx
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+    depends_on:
+      - app
+volumes:
+  database:

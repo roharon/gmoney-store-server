@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 @Getter
 @Entity
@@ -19,7 +20,8 @@ public class Store {
     @GeneratedValue
     private Long id;
 
-    @Column(length=500, nullable = false)
+    @NotNull
+    @Column(length=500)
     private String title;
 
     @Column(length=500)
@@ -38,10 +40,10 @@ public class Store {
     private String postCode;
 
     @Column
-    private float latitude;
+    private Float latitude;
 
     @Column
-    private float longitude;
+    private Float longitude;
 
     @Column
     private String updateDate;
