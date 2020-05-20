@@ -6,6 +6,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.AllArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +27,7 @@ import java.util.*;
 @RequestMapping(value = "/api/v1/store")
 public class StoreController {
 
+    private static final Logger LOGGER = LogManager.getLogger(StoreController.class);
     private StoreRepository storeRepository;
     private final int RADIUS = 3000;
     private final int SIZE_PER_PAGE = 20;
@@ -40,6 +43,7 @@ public class StoreController {
             store = storeRepository.getOne(id);
         } catch (EntityNotFoundException e){
             errors.add(e.getMessage());
+            LOGGER.error(e.getMessage());
         }
 
         return StoreAdapter.storeResponse(store, errors);
@@ -50,7 +54,7 @@ public class StoreController {
     @GetMapping("/search")
     public @ResponseBody StoreListResponse searchStore(
             @ApiParam(value="페이지", defaultValue = "0") @RequestParam Integer page,
-            @ApiParam(value="이름", required=true) @RequestParam @Size(min=3, message="minimum 3") String title,
+            @ApiParam(value="이름", required=true) @RequestParam @Size(min=2, message="minimum 2") String title,
             @ApiParam(value="시군") @RequestParam(required = false) String sigoon) {
         List<String> errors = new ArrayList<>();
         Page<Store> storeList = null;
@@ -58,11 +62,12 @@ public class StoreController {
         try{
             PageRequest pageRequest = PageRequest.of(page, SIZE_PER_PAGE);
             if (sigoon == null)
-                storeList = storeRepository.findByTitleLike(pageRequest, title);
+                storeList = storeRepository.findByTitleContaining(pageRequest, title);
             else
-                storeList = storeRepository.findByTitleLikeAndSigoon(pageRequest, title, sigoon);
+                storeList = storeRepository.findByTitleContainingAndSigoon(pageRequest, title, sigoon);
         } catch(Exception e){
             errors.add(e.getMessage());
+            LOGGER.error(e.getMessage());
         }
 
         return StoreAdapter.storeListResponse(storeList, errors);
@@ -82,8 +87,10 @@ public class StoreController {
                 storeList = storeRepository.findBySigoon(pageable, sigoon);
             else
                 storeList = storeRepository.findBySigoonAndBigCategory(pageable, sigoon, category.toString());
+            LOGGER.error(storeList.getSize());
         } catch(Exception e){
             errors.add(e.getMessage());
+            LOGGER.error(e.getMessage());
         }
 
         return StoreAdapter.storeListResponse(storeList, errors);
@@ -104,6 +111,7 @@ public class StoreController {
             storeList = storeRepository.findBySigoonAndEarthDistance(pageRequest, sigoon, lat, lng, RADIUS);
         } catch(Exception e){
             errors.add(e.getMessage());
+            LOGGER.error(e.getMessage());
         }
 
         return StoreAdapter.storeListResponse(storeList, errors);
@@ -125,6 +133,7 @@ public class StoreController {
             countDict.put(category.toString(), storeCount);
         } catch(Exception e){
             errors.add(e.getMessage());
+            LOGGER.error(e.getMessage());
         }
 
         return StoreAdapter.storeCategoryCountResponse(countDict, errors);
@@ -146,6 +155,7 @@ public class StoreController {
             storeList = storeRepository.findByCategoryAndSigoonAndEarthDistance(pageRequest, category.toString(), sigoon, lat, lng, RADIUS);
         } catch(Exception e){
             errors.add(e.getMessage());
+            LOGGER.error(e.getMessage());
         }
 
         return StoreAdapter.storeListResponse(storeList, errors);
