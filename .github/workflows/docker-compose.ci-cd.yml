@@ -1,0 +1,51 @@
+# This workflow will build a Java project with Gradle
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: Docker compose CI & CD
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    env:
+      USER_NAME: ${{ secrets.USER_NAME }}
+      PASSWORD: ${{ secrets.PASSWORD }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB}}
+      POSTGRES_IN_PORT: ${{secrets.POSTGRES_IN_PORT}}
+      POSTGRES_OUT_PORT: ${{secrets.POSTGRES_OUT_PORT}}
+      SERVERT_PORT: ${{secrets.SERVER_PORT}}
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the docker-compose stack
+      run: docker-compose up -d
+    - name: Check running containers
+      run: docker ps -a
+    - name: Check Logs
+      run: docker logs app
+    - uses: azure/docker-login@v1
+      name: Login to Docker Registry
+      with:
+        login-server: ${{ secrets.DOCKER_REGISTRY_URL }} # default: index.docker.io
+        username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+        password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+    - name: Push Image to Docker Registry
+      run: |
+        docker build . -t ${{ secrets.DOCKER_REGISTRY_URL }}/gmoney-server:${{ github.sha }}
+        docker push ${{ secrets.DOCKER_REGISTRY_URL }}/gmoney-server:${{ github.sha }}
+    - name: Deploy to Docker Host
+      uses: wshihadeh/docker-deployment-action@v1
+      with:
+        remote_docker_host: ${{ secrets.SERVER_HOSTNAME }}/${{ secrets.SERVER_DOMAIN}}
+        ssh_private_key: ${{ secrets.SERVER_SSH_PRIVATE_KEY }}
+        ssh_public_key: ${{ secrets.SERVER_SSH_PUBLIC_KEY }}
+        deployment_mode: docker-compose
+        copy_stack_file: true
+        deploy_path: ${{ secrets.SERVER_DEPLOY_PATH }}
+        args: up -d
+        docker_prune: 'true'
+        pull_images_first: 'true'
