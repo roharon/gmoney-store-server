@@ -9,6 +9,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - /var/lib/postgresql/docker/database:/var/lib/postgresql/database
+    networks:
+      - gmoney_local_network
   app:
     build: .
     env_file:
@@ -21,15 +23,29 @@ services:
         SERVER_PORT: ${SERVER_PORT}
     expose:
       - ${SERVER_PORT}
+    networks:
+      - nginx_network
+      - gmoney_local_network
     depends_on:
       - postgres
   nginx_server:
     image: nginx
+    restart: "on-failure"
     ports:
       - 80:80
+      - 443:443
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
     volumes:
       - ./nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - nginx_network
     depends_on:
       - app
-volumes:
-  database:
+  certbot:
+    image: certbot/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    
+networks:
+  nginx_network:
+    external: true
+  gmoney_local_network:
