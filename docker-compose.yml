@@ -13,7 +13,8 @@ services:
     networks:
       - gmoney_local_network
   app:
-    build: .
+    restart: "on-failure"
+    image: 'repo.treescale.com/roharon/gmoney-server'
     container_name: 'app'
     env_file:
       - .env

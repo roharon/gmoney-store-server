@@ -20,22 +20,24 @@ jobs:
       SERVER_PORT: ${{secrets.SERVER_PORT}}
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Build the docker-compose stack
-      run: docker-compose up -d
-    - name: Check running containers
-      run: docker ps -a
-    - name: Check Logs
-      run: docker logs app
     - uses: azure/docker-login@v1
       name: Login to Docker Registry
       with:
         login-server: ${{ secrets.DOCKER_REGISTRY_URL }} # default: index.docker.io
         username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
         password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+    - uses: actions/checkout@v2
+    - name: Build the docker-compose stack
+      run: |
+        docker network create nginx_network
+        docker-compose up -d
+    - name: Check running containers
+      run: docker ps -a
+    - name: Check Logs
+      run: docker logs app
     - name: Push Image to Docker Registry
       run: |
-        docker build . -t ${{ secrets.DOCKER_REGISTRY_URL }}/gmoney-server:${{ github.sha }}
+        docker build . -t ${{ secrets.DOCKER_REGISTRY_URL }}/${{ secrets.DOCKER_REGISTRY_USERNAME }}/gmoney-server:${{ github.sha }}
         docker push ${{ secrets.DOCKER_REGISTRY_URL }}/gmoney-server:${{ github.sha }}
     - name: Deploy to Docker Host
       uses: wshihadeh/docker-deployment-action@v1
