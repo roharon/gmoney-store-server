@@ -37,23 +37,14 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
                                                      @Param("sigoon") String sigoon, @Param("latitude") Float latitude,
                                                      @Param("longitude") Float longitude, @Param("radius") Integer radius);
 
-    @Query(
-            value = "SELECT * FROM store s WHERE s.sigoon = CAST(:sigoon as varchar) and s.title LIKE %:title%",
-            nativeQuery = true)
-    Page<Store> findByTitleLikeAndSigoon(Pageable pageable, @Param("title") String title, @Param("sigoon") String sigoon);
+    Page<Store> findByTitleContainingAndSigoon(Pageable pageable, String title, String sigoon);
+
+    Page<Store> findByTitleContaining(Pageable pageable, String title);
 
     @Query(
-            value = "SELECT * FROM store s WHERE s.title LIKE %:title%",
-            nativeQuery = true)
-    Page<Store> findByTitleLike(Pageable pageable, @Param("title") String title);
-
-    @Query(
-            value = "SELECT * FROM store s WHERE s.sigoon = :sigoon and s.big_category = :bigCategory",
+            value = "SELECT * FROM store s WHERE s.big_category = :bigCategory and s.sigoon = :sigoon",
             nativeQuery = true)
     Page<Store> findBySigoonAndBigCategory(Pageable pageable, @Param("sigoon") String sigoon, @Param("bigCategory") String bigCategory);
 
-    @Query(
-            value = "SELECT * FROM store s WHERE s.sigoon = :sigoon",
-            nativeQuery = true)
-    Page<Store> findBySigoon(Pageable pageable, @Param("sigoon") String sigoon);
+    Page<Store> findBySigoon(Pageable pageable, String sigoon);
 }
