@@ -37,8 +37,8 @@ jobs:
       run: docker logs app
     - name: Push Image to Docker Registry
       run: |
-        docker build . -t ${{ secrets.DOCKER_REGISTRY_URL }}/${{ secrets.DOCKER_REGISTRY_USERNAME }}/gmoney-server:${{ github.sha }}
-        docker push ${{ secrets.DOCKER_REGISTRY_URL }}/gmoney-server:${{ github.sha }}
+        docker build . -t ${{ secrets.DOCKER_REGISTRY_USERNAME }}/gmoney-server:${{ github.sha }}
+        docker push ${{ secrets.DOCKER_REGISTRY_URL }}/${{ secrets.DOCKER_REGISTRY_URL }}/gmoney-server:${{ github.sha }}
     - name: Deploy to Docker Host
       uses: wshihadeh/docker-deployment-action@v1
       with:
