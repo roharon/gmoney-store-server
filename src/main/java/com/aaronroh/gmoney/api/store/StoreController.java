@@ -29,7 +29,7 @@ public class StoreController {
 
     private static final Logger LOGGER = LogManager.getLogger(StoreController.class);
     private StoreRepository storeRepository;
-    private final int RADIUS = 3000;
+    private final int RADIUS = 1000;
     private final int SIZE_PER_PAGE = 20;
 
     @ApiOperation(value="가맹점 정보", notes = "해당 가맹점의 정보 조회")
@@ -76,17 +76,18 @@ public class StoreController {
     @ApiOperation(value="시군 단위 가맹점 전체 조회", notes="사용자의 시군 내 모든 가맹점 조회")
     @GetMapping("/all")
     public @ResponseBody StoreListResponse searchStore(
+            @ApiParam(value="페이지", defaultValue = "0") @RequestParam Integer page,
             @ApiParam(value="시군", required=true) @RequestParam String sigoon,
             @ApiParam(value="카테고리") @RequestParam(required = false) Store.BigCategory category) {
         List<String> errors = new ArrayList<>();
         Page<Store> storeList = null;
 
         try{
-            Pageable pageable = Pageable.unpaged();
+            PageRequest pageRequest = PageRequest.of(page, SIZE_PER_PAGE);
             if (category == null)
-                storeList = storeRepository.findBySigoon(pageable, sigoon);
+                storeList = storeRepository.findBySigoon(pageRequest, sigoon);
             else
-                storeList = storeRepository.findBySigoonAndBigCategory(pageable, sigoon, category.toString());
+                storeList = storeRepository.findBySigoonAndBigCategory(pageRequest, sigoon, category.toString());
             LOGGER.error(storeList.getSize());
         } catch(Exception e){
             errors.add(e.getMessage());
