@@ -17,7 +17,7 @@ jobs:
       POSTGRES_DB: ${{ secrets.POSTGRES_DB}}
       POSTGRES_IN_PORT: ${{secrets.POSTGRES_IN_PORT}}
       POSTGRES_OUT_PORT: ${{secrets.POSTGRES_OUT_PORT}}
-      SERVERT_PORT: ${{secrets.SERVER_PORT}}
+      SERVER_PORT: ${{secrets.SERVER_PORT}}
 
     steps:
     - uses: actions/checkout@v2
