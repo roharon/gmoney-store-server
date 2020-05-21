@@ -3,6 +3,7 @@ services:
   postgres:
     restart: always
     image: 'postgres:12.2'
+    container_name: 'postgres'
     environment:
       POSTGRES_USER: ${USER_NAME}
       POSTGRES_PASSWORD: ${PASSWORD}
@@ -13,6 +14,7 @@ services:
       - gmoney_local_network
   app:
     build: .
+    container_name: 'app'
     env_file:
       - .env
     environment:
@@ -31,12 +33,14 @@ services:
   nginx_server:
     image: nginx
     restart: "on-failure"
+    container_name: 'nginx_server'
     ports:
       - 80:80
       - 443:443
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
     volumes:
       - ./nginx/conf.d/:/etc/nginx/conf.d/
+      - ./nginx/ssl/:/etc/nginx/ssl/
     networks:
       - nginx_network
     depends_on:
