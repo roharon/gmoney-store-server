@@ -60,36 +60,3 @@ jobs:
         repository: ${{ secrets.DOCKER_REGISTRY_USERNAME}}/gmoney-store-server
         tag_with_ref: true
         tag_with_sha: true
-
-  deploy_swarm:
-    name: Deploy to Swarm
-    needs: [gradle_build, docker_build_and_push]
-    runs-on: ubuntu-latest
-    env:
-      USER_NAME: ${{ secrets.USER_NAME }}
-      PASSWORD: ${{ secrets.PASSWORD }}
-      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-      POSTGRES_IN_PORT: ${{ secrets.POSTGRES_IN_PORT }}
-      POSTGRES_OUT_PORT: ${{ secrets.POSTGRES_OUT_PORT }}
-      SERVER_PORT: ${{ secrets.SERVER_PORT }}
-    steps:
-    - name: copy file via ssh password
-      uses: appleboy/scp-action@master
-      with:
-        host: ${{ secrets.SERVER_DOMAIN }}
-        username: ${{ secrets.SERVER_HOSTNAME }}
-        key: ${{ secrets.SERVER_SSH_PRIVATE_KEY }}
-        source: "docker-compose.yml"
-        target: ${{ secrets.SERVER_DEPLOY_PATH }}
-    - name: Deploy to Docker swarm
-      uses: wshihadeh/docker-deployment-action@v1
-      with:
-        remote_docker_host: ${{ secrets.SERVER_HOSTNAME }}@${{ secrets.SERVER_DOMAIN}}
-        ssh_private_key: ${{ secrets.SERVER_SSH_PRIVATE_KEY }}
-        ssh_public_key: ${{ secrets.SERVER_SSH_PUBLIC_KEY }}
-        deployment_mode: docker-swarm
-        copy_stack_file: true
-        deploy_path: ${{ secrets.SERVER_DEPLOY_PATH }}
-        stack_file_name: docker-compose.yml
-        keep_files: 5
-        args: backend
