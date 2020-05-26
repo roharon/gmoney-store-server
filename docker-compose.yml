@@ -1,40 +1,48 @@
 version: '3.4'
 services:
   postgres:
-    restart: always
     image: 'postgres:12.2'
-    container_name: 'postgres'
+    ports:
+      - 25432:5432
     environment:
-      POSTGRES_USER: ${USER_NAME}
-      POSTGRES_PASSWORD: ${PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USERNAME=${POSTGRES_USERNAME}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
-      - /var/lib/postgresql/docker/database:/var/lib/postgresql/database
+      - /var/lib/postgresql/docker/database
     networks:
       - gmoney_local_network
-  app:
+
+  api-server:
     restart: "on-failure"
-    image: 'registry.gitlab.com/roharon/gmoney-store-server'
-    container_name: 'app'
-    env_file:
-      - .env
+    image: 'registry.gitlab.com/roharon/gmoney-store-server:latest'
+    container_name: api-server
     environment:
         SPRING_PROFILES_ACTIVE: prod
         SPRING_DATASOURCE_URL: jdbc:postgresql://postgres/${POSTGRES_DB}
-        SPRING_DATASOURCE_USERNAME: ${USER_NAME}
-        SPRING_DATASOURCE_PASSWORD: ${PASSWORD}
+        SPRING_DATASOURCE_USERNAME: ${POSTGRES_USERNAME}
+        SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
         SERVER_PORT: ${SERVER_PORT}
-    expose:
-      - ${SERVER_PORT}
-    networks:
-      - nginx_network
-      - gmoney_local_network
     depends_on:
       - postgres
+    networks:
+      - gmoney_local_network
+
+  web-server:
+    restart: "on-failure"
+    image: 'registry.gitlab.com/roharon/gmoney-store-web'
+    container_name: web-server
+    environment:
+      - NODE_DEV=production
+      - CHOKIDAR_USEPOLLING=true
+    stdin_open: true
+    tty: true
+    networks:
+      - gmoney_local_network
+
   nginx_server:
     image: nginx
     restart: "on-failure"
-    container_name: 'nginx_server'
     ports:
       - 80:80
       - 443:443
@@ -42,15 +50,18 @@ services:
     volumes:
       - ./nginx/conf.d/:/etc/nginx/conf.d/
       - ./nginx/ssl/:/etc/nginx/ssl/
-    networks:
-      - nginx_network
     depends_on:
-      - app
+      - api-server
+      - web-server
+    networks:
+      - nginx-network
+      - gmoney_local_network
+
   certbot:
     image: certbot/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-    
+
 networks:
-  nginx_network:
+  nginx-network:
     external: true
   gmoney_local_network:
