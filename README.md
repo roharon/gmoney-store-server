@@ -6,7 +6,13 @@
 
 [![Run on Ainize](https://ainize.ai/images/run_on_ainize_button.svg)](https://ainize.web.app/redirect?git_repo=https://github.com/roharon/gmoney-store-web) - just client (api server not work on this demo)
 
+<br/>
 
+<p align="center" >
+<img src="https://github.com/roharon/gmoney-store-web/blob/master/public/demo.gif" alt="image" height="480" />
+</p>
+
+<br/>
 
 ## About The Project
 
